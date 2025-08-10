@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Cellular Tapestries</title>
+	<style>
+		.grid-container {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			grid-gap: 10px;
+			padding-bottom: 120px
+		}
+	</style>
+</head>
+
+<body>
+
+	<h1>Gallery</h1>
+	<h1><a href="index.html">Home</a></h1>
+	<p>
+		See the fruits of your exploration through the genetic landscape of cellular automata. 
+	</p>
+		
+
+	<script src="ca_engine.js"></script>
+	<script src="view_handler.js"></script>
+	<script>
+		env = new Environment(4, 4);
+		for (let rule of env.cool_rules) {
+			let rule_tapestry = document.createElement("canvas");
+			rule_tapestry.width = 300;
+			rule_tapestry.height = 300;
+			document.body.appendChild(rule_tapestry);
+			display_tapestry(rule_tapestry, generate_tapestry_data(rule, generate_random_tape(env.num_states, 200), 200));
+		}
+	</script>
+
+</body>
+</html>

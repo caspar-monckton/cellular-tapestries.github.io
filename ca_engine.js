@@ -158,6 +158,8 @@ class Environment {
         
         this.mutation_rate = 0.03;
         this.parent_selection_rate = 0;
+		
+		this.load_data();
 	}
         
     add_to_memory(kept) {
