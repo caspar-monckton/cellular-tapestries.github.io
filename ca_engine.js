@@ -41,7 +41,7 @@ class Rule {
 		
         for (const [x, i] of this._instructions.entries()) {
             if (Math.random() <= mutation_rate){
-                copy_instructions[x] = Math.floor(Math.random() * (this._num_states - 1));
+                copy_instructions[x] = Math.floor(Math.random() * (this._num_states));
 			}
 		}
         return copy_instructions;
@@ -102,7 +102,7 @@ class Tape {
 function generate_random_rule(num_states) {
     const instructions = [];
     for (let i = 0; i < num_states ** 3; i++) {
-        instructions.push(Math.floor(Math.random() * (0, num_states - 1)));
+        instructions.push(Math.floor(Math.random() * (0, num_states)));
 	}
     return new Rule(instructions, num_states);
 }
@@ -111,7 +111,7 @@ function generate_random_tape(num_states, num_cells) {
 	const instructions = []
 	
 	for (let i = 0; i < num_cells; i++) {
-        instructions.push(Math.floor(Math.random() * (0, num_states - 1)));
+        instructions.push(Math.floor(Math.random() * (0, num_states)));
 	}
 	
     return new Tape(num_states, instructions);
@@ -130,7 +130,7 @@ function crossover_reproduce(rule1, rule2, pattern) {
 }
 
 function generate_tapestry_data(rule, tape, height) {
-	const colour_palette = [[142, 164, 210], [77, 105, 184], [198, 162, 91], [223, 219, 197]];
+	const colour_palette = [[200, 30, 30], [50, 200, 100], [30, 20, 200], [100, 40, 100]];
 	
 	const grid = [];
 	for (let i = 0; i < height - 1; i++) {
