@@ -130,7 +130,7 @@ function crossover_reproduce(rule1, rule2, pattern) {
 }
 
 function generate_tapestry_data(rule, tape, height) {
-	const colour_palette = [[200, 30, 30], [50, 200, 100], [30, 20, 200], [100, 40, 100]];
+	const colour_palette = [[200, 30, 30], [50, 200, 100], [30, 20, 200], [100, 40, 100], [0, 0, 0]];
 	
 	const grid = [];
 	for (let i = 0; i < height - 1; i++) {
@@ -145,14 +145,15 @@ function generate_tapestry_data(rule, tape, height) {
 }
 
 class Environment {
-    constructor(starting_population) {
+    constructor(starting_population, num_states) {
+		this.num_states = num_states
         this.starting_population = starting_population;
         this.memory = 15;
         this.previous_selection_results = [];
         this.cool_rules = [];
 		
 		for (let i = 0; i < starting_population; i++) {
-			this.cool_rules.push(generate_random_rule(4));
+			this.cool_rules.push(generate_random_rule(this.num_states));
 		}
         
         this.mutation_rate = 0.03;
@@ -178,5 +179,29 @@ class Environment {
     update_parent_selection_rate(){
         this.parent_selection_rate = 0.8 - this.get_current_selection_probability() * 0.6;
 	}
-
+	
+	save_data() {
+		let rule_arrays = [];
+		for (let rule of this.cool_rules) {
+			rule_arrays.push(rule._instructions);
+		}
+		localStorage.setItem("num_states", JSON.stringify(this.num_states));
+		localStorage.setItem("cool_rules", JSON.stringify(rule_arrays));
+	}
+	
+	load_data() {
+		let num_states = localStorage.getItem("num_states");
+		let rule_arrays = localStorage.getItem("cool_rules");
+		if (num_states !== null) {
+			this.num_states = parseInt(num_states);
+		}
+		
+		if (rule_arrays !== null) {
+			this.cool_rules = [];
+			
+			for (let rule_array of JSON.parse(rule_arrays)) {
+				this.cool_rules.push(new Rule(rule_array, this.num_states));
+			}
+		}
+	}
 }
