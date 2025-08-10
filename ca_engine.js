@@ -14,6 +14,7 @@ function pos_mod(number, mod){
 	}
 }
 
+
 // Courtesy of https://stackoverflow.com/users/1048572/bergi
 function sample_list(arr, n) {
     var result = new Array(n),
@@ -129,11 +130,13 @@ function crossover_reproduce(rule1, rule2, pattern) {
 }
 
 function generate_tapestry_data(rule, tape, height) {
+	const colour_palette = [[142, 164, 210], [77, 105, 184], [198, 162, 91], [223, 219, 197]];
+	
 	const grid = [];
 	for (let i = 0; i < height - 1; i++) {
 		const pixel_row = new Array(tape._values.length);
 		for (const [x, value] of tape._values.entries()) {
-			pixel_row[x] = [(value/tape._num_states) * 255, (1 - value/tape._num_states) * 255, 127];
+			pixel_row[x] = colour_palette[value];
 		}
 		grid.push(pixel_row);
 		tape.circ_tape_update(rule);

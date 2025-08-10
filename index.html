@@ -84,16 +84,19 @@
 		const canvas2 = document.getElementById("parent2");
 		env = new Environment(4);
 		
-		let parent1 = sample_list(env.cool_rules, 1)[0];
-		let parent2 = sample_list(env.cool_rules, 1)[0];
+		const parent_selection = sample_list(env.cool_rules, 2);
+		let parent1 = parent_selection[0];
+		let parent2 = parent_selection[1];
 		
 		function reset_children() {
 			current_children = [];
 		}
 				
 		function reset_parents() {
-			parent1 = sample_list(env.cool_rules, 1)[0];
-			parent2 = sample_list(env.cool_rules, 1)[0];
+		const new_selection = sample_list(env.cool_rules, 2);
+		parent1 = new_selection[0];
+		parent2 = new_selection[1];
+
 
 			display_tapestry(canvas1, generate_tapestry_data(parent1, generate_random_tape(4, 200), 200));
 			display_tapestry(canvas2, generate_tapestry_data(parent2, generate_random_tape(4, 200), 200));
