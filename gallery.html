@@ -4,11 +4,12 @@
 <head>
 	<title>Cellular Tapestries</title>
 	<style>
-		.grid-container {
-			display: grid;
-			grid-template-columns: 1fr 1fr 1fr;
-			grid-gap: 10px;
-			padding-bottom: 120px
+		canvas {
+			padding-left: 20px;
+			padding-right: 20px;
+			
+			padding-top: 20px;
+			padding-bottom: 20px;
 		}
 	</style>
 </head>
@@ -20,19 +21,30 @@
 	<p>
 		See the fruits of your exploration through the genetic landscape of cellular automata. 
 	</p>
-		
-
+	<div id="gallery"></div>	
+	
+	
 	<script src="ca_engine.js"></script>
 	<script src="view_handler.js"></script>
 	<script>
 		env = new Environment(4, 4);
+		
+		window.addEventListener("scroll", lazyLoadContent);
+		
 		for (let rule of env.cool_rules) {
 			let rule_tapestry = document.createElement("canvas");
-			rule_tapestry.width = 300;
-			rule_tapestry.height = 300;
-			document.body.appendChild(rule_tapestry);
-			display_tapestry(rule_tapestry, generate_tapestry_data(rule, generate_random_tape(env.num_states, 200), 200));
+			rule_tapestry.width = 200;
+			rule_tapestry.height = 200;
+			rule_tapestry.classList.add("lazy-content");
+			rule_tapestry.setAttribute("loaded", "false");
+			
+			rule_tapestry.setAttribute("rule", JSON.stringify(rule._instructions));
+			rule_tapestry.setAttribute("tape", JSON.stringify(generate_random_tape(4, 200)._values));
+			document.getElementById("gallery").appendChild(rule_tapestry);
 		}
+		
+		lazyLoadContent();
+		
 	</script>
 
 </body>
