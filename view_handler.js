@@ -41,3 +41,42 @@ function lazyLoadContent() {
         console.log("All elements loaded, scroll listener removed");
     }
 }
+
+function load_live_tape(tape_display, tape, context) {
+	if (tape === null) {
+		tape_display.innerHTML = "<h1>No Tape Loaded.</h1>"
+	} else {
+		tape_display.innerHTML = null;
+		const colour_palette = [[200, 30, 30], [50, 200, 100], [30, 20, 200], [100, 40, 100], [0, 0, 0]];
+		const start_buffer = document.createElement("div");
+		start_buffer.classList.add("tape-buffer");
+		const end_buffer = document.createElement("div");
+		end_buffer.classList.add("tape-buffer");
+		
+		tape_display.appendChild(start_buffer);
+		tape._values.entries().forEach(doub => {
+			let tape_cell = doub[1];
+			let tape_index = doub[0];
+			
+			let colour = colour_palette[tape_cell];
+			const view_cell = document.createElement("button");
+			view_cell.classList.add("tape-cell");
+			view_cell.style.background=`rgb(${colour[0]}, ${colour[1]}, ${colour[2]})`;
+			view_cell.innerHTML = tape_cell;
+			// This is so ugly, ideally I should only be changing the tape and the display should automatically update since they should be tied by reference...
+			view_cell.onclick = function() {
+				console.log(tape);
+				tape._values[tape_index] = context.current_colour; 
+				view_cell.style.background=`rgb(
+					${colour_palette[context.current_colour][0]}, 
+					${colour_palette[context.current_colour][1]}, 
+					${colour_palette[context.current_colour][2]}
+				)`;
+			view_cell.innerHTML = context.current_colour;
+			};
+			
+			tape_display.appendChild(view_cell);
+		});
+		tape_display.appendChild(end_buffer);
+	}
+}

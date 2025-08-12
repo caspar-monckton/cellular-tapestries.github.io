@@ -4,12 +4,36 @@
 <head>
 	<title>Cellular Tapestries</title>
 	<style>
-		canvas {
-			padding-left: 20px;
-			padding-right: 20px;
-			
-			padding-top: 20px;
-			padding-bottom: 20px;
+
+		
+		#gallery {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+		
+		.gallery-box {
+			padding: 20px;
+			position: relative;
+		}
+		
+		.link-button {
+			border-style: solid; 
+			border-color: #000;
+		}
+		
+		.hover-buttons {
+			position: absolute;
+			top: 90%;
+			left: 20%;
+			opacity: 0;
+			transition: opacity 0.2s;
+			pointer-events: none;
+		}
+		
+		.gallery-box:hover .hover-buttons {
+			opacity: 1;
+			pointer-events: auto; /* Enable clicks when visible */
 		}
 	</style>
 </head>
@@ -27,20 +51,48 @@
 	<script src="ca_engine.js"></script>
 	<script src="view_handler.js"></script>
 	<script>
+		function add_gallery_item(rule){
+			let rule_tapestry = document.createElement("canvas");
+			let tapestry_box = document.createElement("div");
+			tapestry_box.classList.add("gallery-box");
+			
+			let button_container = document.createElement("div");
+			button_container.classList.add("hover-buttons");
+			
+			let explore_button = document.createElement("a");
+			explore_button.classList.add("link-button");
+			explore_button.href = "explore.html"
+			explore_button.onclick = function () {localStorage.setItem('selectedRule', JSON.stringify(rule._instructions));}
+			explore_button.innerHTML = "Explore";
+			
+			let family_tree_button = document.createElement("a");
+			family_tree_button.innerHTML = "Family Tree";
+			family_tree_button.classList.add("link-button");
+			
+			
+			button_container.appendChild(explore_button);
+			button_container.appendChild(family_tree_button);
+			
+			
+			rule_tapestry.width = 200;
+			rule_tapestry.height = 200;
+			rule_tapestry.classList.add("lazy-content");
+			
+			rule_tapestry.setAttribute("loaded", "false");
+			rule_tapestry.setAttribute("rule", JSON.stringify(rule._instructions));
+			rule_tapestry.setAttribute("tape", JSON.stringify(generate_random_tape(4, 200)._values));
+			
+			tapestry_box.appendChild(rule_tapestry);
+			tapestry_box.appendChild(button_container);
+			document.getElementById("gallery").appendChild(tapestry_box);
+		}
+	
 		env = new Environment(4, 4);
 		
 		window.addEventListener("scroll", lazyLoadContent);
 		
 		for (let rule of env.cool_rules) {
-			let rule_tapestry = document.createElement("canvas");
-			rule_tapestry.width = 200;
-			rule_tapestry.height = 200;
-			rule_tapestry.classList.add("lazy-content");
-			rule_tapestry.setAttribute("loaded", "false");
-			
-			rule_tapestry.setAttribute("rule", JSON.stringify(rule._instructions));
-			rule_tapestry.setAttribute("tape", JSON.stringify(generate_random_tape(4, 200)._values));
-			document.getElementById("gallery").appendChild(rule_tapestry);
+			add_gallery_item(rule);
 		}
 		
 		lazyLoadContent();

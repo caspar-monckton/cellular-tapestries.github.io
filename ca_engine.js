@@ -96,6 +96,10 @@ class Tape {
             this._values[x] = i;
 		}
 	}
+	
+	clone() {
+		return new Tape(this._num_states, this._values.slice());
+	}
     
 }	   
                 
@@ -115,6 +119,12 @@ function generate_random_tape(num_states, num_cells) {
 	}
 	
     return new Tape(num_states, instructions);
+}
+
+function generate_blank_tape(default_state, num_states, num_cells) {
+	const values = Array(num_cells).fill(default_state);
+	
+    return new Tape(num_states, values);
 }
 
 function crossover_reproduce(rule1, rule2, pattern) {
@@ -205,5 +215,31 @@ class Environment {
 				this.cool_rules.push(new Rule(rule_array, this.num_states));
 			}
 		}
+	}
+}
+
+class TapeEnvironment {
+	constructor(num_states) {
+		this._num_states = num_states;
+		this.current_rule = null;
+		this.loaded_tape = null;
+		this.tapes = [];
+	}
+	
+	set_current_rule(rule) {
+		this.current_rule = rule;
+	}
+	
+	load_new_tape(tape) {
+		this.loaded_tape = tape;
+		this.tapes.push(tape);
+	}
+	
+	load_stored_tape(tape_index) {
+		this.loaded_tape = this.tapes[tape_index];
+	}
+	
+	clear_current_tape() {
+		this.loaded_tape = null;
 	}
 }
