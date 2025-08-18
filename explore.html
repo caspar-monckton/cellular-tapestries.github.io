@@ -44,53 +44,12 @@
 </head>
 <body>
 <h1>Tapestry Explorer</h1>
-<p>Create your own tape to explore the variation that exists within the selected rule. Select a colour with the state selector and click a tape cell to change the colour of that cell to the selected colour. Try generating random tapes or blank tapes and then modifying them. Support is on its way for saving custom tapes and combining them. Press Render Tape at the bottom to create a tapestry. The rules are deterministic, meaning that if you input the same tape twice, the rule will output the same tapestry.</p>
+<p>Create your own tape to explore the variation that exists within the selected rule. Generate a random or blank tape to get started (you can set the length of the tape with the "width" box). To modify the tape, simply press on the corresponding cell and it will cycle to the next value. To see the resulting tapestry, press "generate" and wait for the outcome. The rules are deterministic, which means that running a single rule on the same input twice will yeild the exact same tapestry. You can save nice tapestries as pngs with the download button. The resolution will be whatever the cell size is multiplied by each of the dimensions width and height.</p>
 <h1><a href="gallery.html">Back to Gallery</a></h1>
 <h1><a href="index.html">Home</a></h1>
 
-<div id="rule-preview">
-	<canvas id="selected-rule" width="200" height="200"></canvas>
-</div>
+<div id="tape-container">
 
-<div id="tape-controls">
-	<button id="generate-blank-tape" onclick="add_blank_env_tape()">Generate Blank Tape</button>
-	<button id="generate-blank-tape" onclick="add_random_env_tape()">Generate Random Tape</button>
-	
-	<button id="clear-tape" onclick="clear_current_tape()">Clear Tape</button>	
-	
-		<div id='colour-selector-box' class="selector-box">
-		State Selector
-		<input type='radio' name='colour-selector' value='0' checked onclick = "select_state('0')">0</input>
-		<input type='radio' name='colour-selector' value='1' onclick = "select_state('1')">1</input>
-		<input type='radio' name='colour-selector' value='2' onclick = "select_state('2')">2</input>
-		<input type='radio' name='colour-selector' value='3' onclick = "select_state('3')">3</input>
-		</div>
-		
-		<div id='size-selector-box' class="selector-box">
-		State Selector
-		<input type='radio' name='size-selector' value='0' onclick = "select_size('50')">50 cells</input>
-		<input type='radio' name='size-selector' value='1' checked onclick = "select_size('100')">100 cells</input>
-		<input type='radio' name='size-selector' value='2' onclick = "select_size('200')">200</input>
-		<input type='radio' name='size-selector' value='3' onclick = "select_size('400')">400</input>
-		<input type='radio' name='size-selector' value='3' onclick = "select_size('800')">800</input>
-		
-		
-		</div>
-</div>
-
-<div id="tape-box">
-	<div id="main-tape" class="live-tape-editor"></div>
-</div>
-
-<div id="tape-list">
-</div>
-
-<div id="render-controls">
-	<button id="render-tape-button" onclick = "render_current_tape()">Render Tape</button>
-	<div>
-	<canvas id="tapestry-display" width="800" height="800"></canvas>
-	</div>
-</div>
 
 <!-- Render the tape -->
 <script src="ca_engine.js"></script>
@@ -101,53 +60,32 @@
 		current_colour: 0,
 		tape_length: 100
 	};
+	
+	const preview = new TapestryHandler(1, new Tapestry(context.selected_rule, generate_random_tape(4, 200), 200), document.getElementById("tape-container"));
+	preview.update_display();
+	
+	const tape_handler = new TapeHandler(
+		null, 
+		context.selected_rule,
+		document.getElementById("tape-container")
+	);
+	const download_button = document.createElement("button");
+	download_button.innerHTML = "Download tapestry as .PNG";
+	document.body.appendChild(download_button);
+	
+	download_button.addEventListener("click", () => {
+    tape_handler.simulator.display.toBlob((blob) => {
+		  const link = document.createElement("a");
+		  link.href = URL.createObjectURL(blob);
+		  link.download = "tapestry.png";
+		  link.click();
 
-	tape_env = new TapeEnvironment(4);
-	
-	display_tapestry(document.getElementById("selected-rule"), generate_tapestry_data(context.selected_rule, generate_random_tape(tape_env._num_states, 200), 200));
-	
-	
-	load_live_tape(document.getElementById("main-tape"), null, context);
 
-	
-	function select_state(state_string) {
-		let state = parseInt(state_string);
-		const states = [0, 1, 2, 3];
-		if (states.includes(state)) {
-			context.current_colour = state;
-		}
-		//console.log(current_colour);
-	}
-	
-	function select_size(size_string) {
-		context.tape_length = parseInt(size_string);
-		clear_current_tape();
-	}
-	
-	function add_blank_env_tape() {
-		const new_tape = generate_blank_tape(context.current_colour, tape_env._num_states, context.tape_length);
-		tape_env.load_new_tape(new_tape);
-		load_live_tape(document.getElementById("main-tape"), tape_env.loaded_tape, context);
-	}
-	
-	function add_random_env_tape() {
-		const new_tape = generate_random_tape(tape_env._num_states, context.tape_length);
-		tape_env.load_new_tape(new_tape);
-		load_live_tape(document.getElementById("main-tape"), tape_env.loaded_tape, context);
-	}
-	
-	function clear_current_tape() {
-		tape_env.clear_current_tape();
-		load_live_tape(document.getElementById("main-tape"), null, context);
-	}
-	
-	function render_current_tape() {
-		display = document.getElementById("tapestry-display");
-		display_tapestry(display, generate_tapestry_data(context.selected_rule, tape_env.loaded_tape.clone(), context.tape_length));
-	}
+		  URL.revokeObjectURL(link.href);
+		}, "image/png");
+	});
 	
 </script>
-
 
 </body>
 </html>

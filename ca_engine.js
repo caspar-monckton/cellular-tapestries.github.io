@@ -10,11 +10,13 @@ function pos_mod(number, mod){
 	if (number < 0) {
 		return mod + (number % mod);
 	} else {
-		return number % mod
+		return number % mod;
 	}
 }
 
-
+function calc_rule_length(num_states) {
+	return num_states ** 3;
+}
 // Courtesy of https://stackoverflow.com/users/1048572/bergi
 function sample_list(arr, n) {
     var result = new Array(n),
@@ -100,7 +102,41 @@ class Tape {
 	clone() {
 		return new Tape(this._num_states, this._values.slice());
 	}
+	
+	length() {
+		return this._values.length;
+	}
     
+}
+
+class Tapestry {
+	constructor(rule, tape, height) {
+		this.rule = rule;
+		this.tape = tape;
+		this.width = tape.length();
+		this.height = height;
+		this.pixel_grid = null;
+	}
+	
+	generate_grid_data() {	
+		const grid = [];
+		const tape_start = this.tape._values.slice();
+		for (let i = 0; i < this.height - 1; i++) {
+			const pixel_row = new Array(this.width);
+			for (const [x, value] of this.tape._values.entries()) {
+				pixel_row[x] = value;
+			}
+			grid.push(pixel_row);
+			this.tape.circ_tape_update(this.rule);
+		}
+		this.tape._values = tape_start;
+		return grid;
+	}
+	
+	set_tapestry_parameters(width, height) {
+		this.width = width;
+		this.height = height;
+	}
 }	   
                 
 function generate_random_rule(num_states) {
@@ -137,21 +173,6 @@ function crossover_reproduce(rule1, rule2, pattern) {
 		}
 	}
     return new Rule(new_instructions, rule1.get_num_states());
-}
-
-function generate_tapestry_data(rule, tape, height) {
-	const colour_palette = [[200, 30, 30], [50, 200, 100], [30, 20, 200], [100, 40, 100], [0, 0, 0]];
-	
-	const grid = [];
-	for (let i = 0; i < height - 1; i++) {
-		const pixel_row = new Array(tape._values.length);
-		for (const [x, value] of tape._values.entries()) {
-			pixel_row[x] = colour_palette[value];
-		}
-		grid.push(pixel_row);
-		tape.circ_tape_update(rule);
-	}
-	return grid;
 }
 
 class Environment {
@@ -218,6 +239,78 @@ class Environment {
 	}
 }
 
+class EvolutionEnvironment {
+	constructor (env, num_children) {
+		this.env = env;
+		this.num_children = num_children;
+		this.tape_resolution = 200;
+		this.current_tape;
+		this.pattern_base = [];
+		
+		for (let i = 0; i < calc_rule_length(this.env.num_states); i++) {
+			this.pattern_base.push(i);
+		}
+		
+		this.select_new_tape();
+		
+		this.parents = sample_list(this.env.cool_rules, 2);
+		this.children = [];
+		this.generate_children();
+	}
+	
+	select_new_tape() {
+		this.current_tape = generate_random_tape(this.env.num_states, this.tape_resolution);
+		//console.log(this.current_tape);
+	}
+
+	
+	select_parent(index) {
+		let parent_candidate = this.parents[(index + 1) % 2];
+		do {
+			//console.log("selecting new parent candidate");
+			parent_candidate = sample_list(this.env.cool_rules, 1)[0];
+		}
+		while (parent_candidate === this.parents[(index + 1) % 2]);
+		//console.log(this.parents[index]._instructions);
+		//console.log(parent_candidate._instructions);
+		
+		this.parents[index] = parent_candidate;
+		this.generate_children();
+	}
+	
+	remove_parent(index) {
+		for (const [x, rule] of this.env.cool_rules.entries()) {
+			if (rule === this.parents[index]) {
+				this.env.cool_rules.splice(x, 1);
+			}
+		}
+		
+		while (this.env.cool_rules.length <= 2) {
+			this.env.cool_rules.push(generate_random_rule(this.env.num_states));
+		}
+		
+		this.env.save_data();
+	}
+	
+	generate_children() {
+		this.children = [];
+		for (let i = 0; i < this.num_children; i++) {
+			this.children.push(
+				crossover_reproduce(this.parents[0], this.parents[1], sample_list(this.pattern_base, 32)).produce_mutated_child(this.env.mutation_rate)
+			);
+		}
+	}
+	
+	regenerate_child(index) {
+		this.children[index] = crossover_reproduce(this.parents[0], this.parents[1], sample_list(this.pattern_base, 32)).produce_mutated_child(this.env.mutation_rate)	
+	}
+	
+	add_child(index) {
+		this.env.cool_rules.push(this.children[index]);
+		this.env.save_data();
+	}
+}
+
 class TapeEnvironment {
 	constructor(num_states) {
 		this._num_states = num_states;
@@ -241,5 +334,11 @@ class TapeEnvironment {
 	
 	clear_current_tape() {
 		this.loaded_tape = null;
+	}
+}
+
+class Gallery {
+	constructor(gallery_elements) {
+		this.gallery_elements = gallery_elements;
 	}
 }

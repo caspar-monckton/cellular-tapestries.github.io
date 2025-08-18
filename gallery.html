@@ -15,6 +15,7 @@
 		.gallery-box {
 			padding: 20px;
 			position: relative;
+			display: inline-block;
 		}
 		
 		.link-button {
@@ -45,57 +46,29 @@
 	<p>
 		See the fruits of your exploration through the genetic landscape of cellular automata. 
 	</p>
-	<div id="gallery"></div>	
+	<div id="gallery-holder"></div>	
 	
 	
 	<script src="ca_engine.js"></script>
 	<script src="view_handler.js"></script>
 	<script>
-		function add_gallery_item(rule){
-			let rule_tapestry = document.createElement("canvas");
-			let tapestry_box = document.createElement("div");
-			tapestry_box.classList.add("gallery-box");
-			
-			let button_container = document.createElement("div");
-			button_container.classList.add("hover-buttons");
-			
-			let explore_button = document.createElement("a");
-			explore_button.classList.add("link-button");
-			explore_button.href = "explore.html"
-			explore_button.onclick = function () {localStorage.setItem('selectedRule', JSON.stringify(rule._instructions));}
-			explore_button.innerHTML = "Explore";
-			
-			let family_tree_button = document.createElement("a");
-			family_tree_button.innerHTML = "Family Tree";
-			family_tree_button.classList.add("link-button");
-			
-			
-			button_container.appendChild(explore_button);
-			button_container.appendChild(family_tree_button);
-			
-			
-			rule_tapestry.width = 200;
-			rule_tapestry.height = 200;
-			rule_tapestry.classList.add("lazy-content");
-			
-			rule_tapestry.setAttribute("loaded", "false");
-			rule_tapestry.setAttribute("rule", JSON.stringify(rule._instructions));
-			rule_tapestry.setAttribute("tape", JSON.stringify(generate_random_tape(4, 200)._values));
-			
-			tapestry_box.appendChild(rule_tapestry);
-			tapestry_box.appendChild(button_container);
-			document.getElementById("gallery").appendChild(tapestry_box);
-		}
 	
 		env = new Environment(4, 4);
-		
-		window.addEventListener("scroll", lazyLoadContent);
-		
+		const gallery_items = [];
 		for (let rule of env.cool_rules) {
-			add_gallery_item(rule);
+			gallery_items.push(new Tapestry(rule, generate_random_tape(4, 200), 200));
 		}
 		
-		lazyLoadContent();
+		const gallery = new Gallery(gallery_items);
+		
+		const gallery_handler = new GalleryHandler(gallery, document.getElementById("gallery-holder"));
+		
+		window.addEventListener("scroll", event_listener);
+		event_listener();
+		
+		function event_listener() {
+			lazyLoadContent(gallery_handler.gallery_views, event_listener);
+		}
 		
 	</script>
 
